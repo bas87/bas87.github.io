@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sand Simulator</title>
+  <link rel="stylesheet" href="C:\Users\toman\Downloads\style.css">
+</head>
+<body>
+  <div class="app">
+    <h1>Sand Simulator</h1>
+
+    <div class="stage">
+      <div class="wall">
+        <canvas id="playground" width="600" height="800"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Material</h2>
+
+        <button class="tool-btn active" data-tool="sand">
+          <span class="swatch swatch-sand"></span>Sand
+        </button>
+        <button class="tool-btn" data-tool="water">
+          <span class="swatch swatch-water"></span>Water
+        </button>
+        <button class="tool-btn" data-tool="rock">
+          <span class="swatch swatch-rock"></span>Rock
+        </button>
+        <button class="tool-btn" data-tool="erase">
+          <span class="swatch swatch-erase"></span>Erase
+        </button>
+
+        <hr>
+
+        <label class="brush-label" for="brushSize">Brush size</label>
+        <input type="range" id="brushSize" min="1" max="10" value="4">
+
+        <hr>
+
+        <button id="clearBtn" class="clear-btn">Clear playground</button>
+
+        <p class="hint">Hold the left mouse button over the playground to place material. Erase removes anything (sand, water or rock) under the brush.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="C:\Users\toman\Downloads\script.js"></script>
+</body>
+</html>
