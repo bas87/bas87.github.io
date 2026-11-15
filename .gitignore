@@ -1,0 +1,11 @@
+# Build output and dependencies. The GitHub Action recreates both.
+dist/
+node_modules/
+
+# Logs and env
+*.log
+.env
+
+# System files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,15 @@
+{
+  "name": "devzone",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsx index.ts",
+    "dev": "tsx watch index.ts --dev"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.2.0",
+    "tsx": "^4.23.15"
+  }
+}
