@@ -14,7 +14,7 @@ const SITE = 'https://devzone.cz';
 const DESCRIPTION = "Michal Toman's notes from building for the web in the AI era.";
 const OUT = 'dist';
 
-type Note = { slug: string; title: string; date: Date; description: string; html: string };
+type Note = { slug: string; title: string; date: Date; description: string; credits: string; html: string };
 
 // ── Pages ──────────────────────────────────────────────────────────────────
 
@@ -55,7 +55,8 @@ function notePage(n: Note) {
   <div class="article-body">
 ${n.html}
   </div>
-</article>
+${n.credits ? `  <p class="credits">${esc(n.credits)}</p>
+` : ''}</article>
 
 <p class="back"><a href="/">← Back to notes</a></p>`;
 }
@@ -111,6 +112,7 @@ function readNotes(): Note[] {
       title: String(data.title),
       date: new Date(data.date),
       description: String(data.description ?? ''),
+      credits: String(data.credits ?? ''),
       html: marked.parse(content) as string,
     });
   }

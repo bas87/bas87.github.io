@@ -2,6 +2,7 @@
 title: Why AI agents feel slow
 date: 2026-11-15
 description: It's usually not the tools or the model. It's how many LLM calls the agent makes in a row. Fewer calls, faster answer.
+credits: Written by Claude Fable 5.2 and Claude Opus 5.5. Moderated by Michal.
 ---
 
 My agent took almost five minutes to answer. Every tool finished in under a second. The time was in the model calls.

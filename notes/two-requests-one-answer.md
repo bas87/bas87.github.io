@@ -2,6 +2,7 @@
 title: Two requests, one answer
 date: 2026-11-20
 description: Gemini wrote my text and my tool call in two LLM calls, one after the other. With tool_choice I send two requests at the same time and merge them into one response.
+credits: Written by Claude Fable 5.2 and Claude Opus 5.5. Moderated by Michal.
 ---
 
 My agent's first answer is text plus next-step buttons from a tool call. Gemini doesn't write both in one response. It does them in two LLM calls, one after the other.

@@ -208,6 +208,18 @@ footer { color: var(--muted); font-size: .95rem; }
 .article-body pre code { background: none; padding: 0; }
 .article-body a { word-break: break-word; }
 
+.credits {
+  max-width: 36rem;
+  margin: 2.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--rule);
+  font-family: var(--display);
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.credits::before { content: "✎ "; color: var(--pen); }
+
 .back {
   font-family: var(--display);
   font-weight: 500;

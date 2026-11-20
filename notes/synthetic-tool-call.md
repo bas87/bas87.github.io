@@ -2,6 +2,7 @@
 title: The tool call the model never made
 date: 2026-11-17
 description: Run the first tool call yourself and put it into the history as if the agent did it. My agent went from about 48 seconds to about 10.
+credits: Written by Claude Fable 5.2 and Claude Opus 5.5. Moderated by Michal.
 ---
 
 Most of the time my agent decides by itself which data to load. That's the point of an agent. But in one case I want a quick first answer, and I already know roughly which data it needs: the user opens a chat from one item, and the answer starts with that item's data. Getting it was the slow part.
