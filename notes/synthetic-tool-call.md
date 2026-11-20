@@ -1,57 +1,42 @@
 ---
 title: The tool call the model never made
 date: 2026-11-17
-description: A quick question doesn't need a super agent. Make the first tool call yourself and let the model answer in one go.
+description: Run the first tool call yourself and put it into the history as if the agent did it. My agent went from about 48 seconds to about 10.
 ---
 
-In my [last note](/notes/why-ai-agents-feel-slow/) I found that speed is mostly about the number of LLM calls. So I want the agent to answer in one LLM call.
+Most of the time my agent decides by itself which data to load. That's the point of an agent. But in one case I want a quick first answer, and I already know roughly which data it needs: the user opens a chat from one item, and the answer starts with that item's data. Getting it was the slow part.
 
-## The idea
+An agent gets data in a loop. The model decides to call a tool. The tool runs. The result goes back. Then the model is called again. So every data step costs a full LLM call ([why calls matter](/notes/why-ai-agents-feel-slow/)). For my agent that was 3 LLM calls and about 48 seconds.
 
-In my case the agent needs data to answer. There are two obvious ways to get it:
+I tried putting 50 rows as JSON into the user's message: about 18 seconds, but about 92K tokens with 0% prompt cache.
 
-- **Let the agent load it.** The tool is already there, but on the question I tested it took 3 LLM calls and about 48 seconds.
-- **Put the data into the user's message.** No extra call, but the tool already knows how to load the data. To use the same code before the agent starts, I would have to move it to a shared place, and then two places know how to load the data. It was also slower than I expected: with the same 50 rows as JSON in the message, the request was about 92K tokens with 0% prompt cache, and the answer took about 18 seconds.
+The fix: I make that first tool call myself, before the model starts. I put the call and its result into the history, as if the agent did it. The loop starts with the data already there. Same tool code. About 10 seconds.
 
-So I make the tool call myself, the same one the agent would make first. I run the tool before the model starts and put the call and its result into the history, as if the agent had done it. The tool stays where it is, and the frontend sends `data_id` only with the first message.
+```
+normal (one data step)
+1. user: question
+2. model: call the tool  (LLM call)
+3. tool: data
+4. model: answer         (LLM call)
 
-In LangChain it's a small middleware:
-
-```python
-from langchain.agents.middleware import AgentMiddleware
-from langchain_core.messages import AIMessage, RemoveMessage
-
-
-class DataPreloadMiddleware(AgentMiddleware):
-    def __init__(self, tools):
-        super().__init__()
-        self.tool = next(t for t in tools if t.name == "get_user_data")
-
-    async def abefore_agent(self, state, runtime):
-        data_id = runtime.context.data_id
-        if not data_id:
-            return None  # normal chat, do nothing
-
-        question = state["messages"][-1]
-        call = {
-            "name": self.tool.name,
-            "args": {"data_id": data_id, "limit": 50},
-            "id": f"preload_{data_id}",
-            "type": "tool_call",
-        }
-        result = await self.tool.ainvoke(call)
-
-        # tool call first, then the question (Gemini rejects a made-up tool call after the user's message)
-        return {
-            "messages": [
-                RemoveMessage(id=question.id),
-                AIMessage(content="", tool_calls=[call]),
-                result,
-                question.model_copy(update={"id": None}),
-            ]
-        }
+mine
+1. model: call the tool  (I wrote it)
+2. tool: data            (I ran it)
+3. user: question
+4. model: answer         (LLM call)
 ```
 
-There is one more thing in the same middleware (`wrap_model_call`). In the first answer, the model can use only one tool: suggest next steps. All other tools are hidden, so it can't go and load more data. It just answers. It's the same "answer first" idea from the last note, but done in code, not in the prompt. In the next message all tools are back, so the user can ask for more.
+```python
+# sketch, in a LangChain before_agent hook
+call = {"name": "load_rows", "args": {"limit": 50}, "id": "preload-1", "type": "tool_call"}
+result = await load_rows.ainvoke(call)  # returns a ToolMessage
+history = [AIMessage(content="", tool_calls=[call]), result, question]
+```
 
-Result: about 10 seconds (the tool about 1.6s, one LLM call about 6s), down from 48 and 18.
+Put it before the question. Gemini rejects a made-up tool call after the user's message.
+
+Only for that first answer. From the next message the agent decides by itself again.
+
+If you know the first tool call, don't make the model ask for it.
+
+Next: [two requests, one answer](/notes/two-requests-one-answer/).

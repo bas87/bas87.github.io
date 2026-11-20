@@ -1,32 +1,24 @@
 ---
 title: Why AI agents feel slow
 date: 2026-11-15
-description: It's usually not the tools or the model. It's how many LLM calls the agent makes. Fewer calls, faster answer.
+description: It's usually not the tools or the model. It's how many LLM calls the agent makes in a row. Fewer calls, faster answer.
 ---
 
-I spent a few hours this week making an AI agent answer faster. Here are my notes.
+My agent took almost five minutes to answer. Every tool finished in under a second. The time was in the model calls.
 
-## Where the time goes
-
-The agent worked in a loop: call a tool, think, call another tool, think, then answer. It took almost five minutes.
-
-The trace showed that the tools were fast, each one under a second. The time was in the model calls, and there were many of them. One step alone took over two minutes.
+My rule now:
 
 ```
-total time ≈ number of LLM calls × time per call
+total time ≈ LLM calls in a row × time per call
 ```
 
-So it's mostly the number of LLM calls.
+What made the difference, most important first:
 
-## What helps less than you think
+- **LLM calls in a row.** An agent is [a model calling tools in a loop](https://docs.langchain.com/oss/python/langchain/agents). Every round is one more call. Calls that run at the same time don't add up ([example](/notes/two-requests-one-answer/)).
+- **The context.** What the model gets up front. Load the data before the model starts ([how I did it](/notes/synthetic-tool-call/)). Say in the prompt: "dig deeper only if asked". Keep it small.
+- **The thinking level.** Lower it when the model only sums up data it already has ([reasoning settings](https://docs.langchain.com/oss/python/langchain/models)).
+- **The model.** A faster model helped less than I expected. Each call is faster, but the number of calls stays the same.
 
-- A faster model. Each call is a bit faster, but you still have all the calls.
-- Subagents or parallel work. If the task is linear (A, then B, then answer), more agents only add more LLM calls. Parallel agents help only when the questions are independent.
+Subagents on a linear task only add more calls.
 
-## What helps: fewer LLM calls
-
-1. **Let the LLM answer in one call.** Tell it: "Answer from what you have. Dig deeper only if the user asks." Without this, the model keeps loading more to be thorough.
-2. **Get the data for it.** Load what the agent would load in its first steps before the LLM starts, and put it in the context. Those calls are gone. (How I did it: [the tool call the model never made](/notes/synthetic-tool-call/).)
-3. **Lower the thinking level.** The model doesn't need deep thinking to sum up data it already has. Low thinking made each call much shorter.
-
-In the end the agent answered in one LLM call instead of many. It's also cheaper.
+Count the LLM calls first. Then remove them.
